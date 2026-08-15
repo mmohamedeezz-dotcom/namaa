@@ -1,0 +1,67 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root { color-scheme: light; }
+html { scroll-behavior: smooth; }
+body { @apply bg-paper text-ink font-body antialiased; }
+
+.container-x { @apply mx-auto w-full max-w-3xl px-4; }
+
+.h-display { @apply font-display font-black leading-[1.15]; }
+
+.input {
+  @apply w-full rounded-xl border border-line bg-white px-4 py-3 text-[15px] text-ink placeholder:text-ink/35 outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/25;
+}
+.label { @apply mb-1.5 block text-[13px] font-bold text-ink/70; }
+
+.btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-[15px] font-extrabold transition active:scale-[.98] disabled:opacity-50 disabled:pointer-events-none;
+}
+.btn-gold { @apply btn bg-gold text-ink hover:bg-gold-2 shadow-soft; }
+.btn-ink { @apply btn bg-ink text-paper hover:bg-ink-2; }
+.btn-ghost { @apply btn border border-line bg-white text-ink hover:border-gold/60; }
+
+.chip { @apply rounded-full border border-line bg-white px-3 py-1 text-[12px] font-bold text-ink/70; }
+
+/* ---------- الكارت (العنصر المميز) ---------- */
+.vcard {
+  aspect-ratio: 1.586 / 1;
+  @apply relative w-full max-w-[420px] overflow-hidden rounded-2xl text-paper shadow-card;
+  background:
+    radial-gradient(120% 160% at 85% -10%, rgba(199,148,57,.32), transparent 55%),
+    radial-gradient(90% 120% at -10% 110%, rgba(199,148,57,.14), transparent 50%),
+    linear-gradient(135deg, #0B2138 0%, #051427 62%, #030B16 100%);
+}
+.vcard::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,.14) 45%, rgba(255,255,255,.04) 52%, transparent 62%);
+  transform: translateX(-120%);
+  animation: sheen 4.5s ease-in-out infinite;
+}
+@keyframes sheen { 0%, 55% { transform: translateX(-120%); } 85%, 100% { transform: translateX(130%); } }
+
+.vchip {
+  @apply h-8 w-11 rounded-md;
+  background: linear-gradient(135deg, #E4B95B, #C79439 55%, #8C6420);
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,.25), inset 0 6px 10px rgba(255,255,255,.25);
+}
+.mono { font-variant-numeric: tabular-nums; letter-spacing: .06em; }
+
+.fade-up { animation: fadeUp .5s ease both; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+.pulse-dot { @apply inline-block h-2.5 w-2.5 rounded-full bg-gold; animation: pd 1.2s ease-in-out infinite; }
+@keyframes pd { 0%,100% { transform: scale(.7); opacity:.5 } 50% { transform: scale(1); opacity:1 } }
+
+.flip { transform-style: preserve-3d; transition: transform .6s cubic-bezier(.2,.7,.2,1); }
+.flip.on { transform: rotateY(180deg); }
+.face { backface-visibility: hidden; }
+.back { transform: rotateY(180deg); }
+
+@media (prefers-reduced-motion: reduce) {
+  .vcard::after, .pulse-dot, .fade-up { animation: none !important; }
+  .flip { transition: none; }
+  * { scroll-behavior: auto !important; }
+}
