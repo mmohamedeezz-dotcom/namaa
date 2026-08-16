@@ -59,7 +59,8 @@ export default function CardView() {
   const fetchStatus = useCallback(async () => {
     if (!code) return
     try {
-      const r = await api<StatusResp>(`/api/order-status?code=${code}`)
+     const psQuery = paymentStatus ? `&paymentStatus=${encodeURIComponent(paymentStatus)}` : ''
+      const r = await api<StatusResp>(`/api/order-status?code=${code}${psQuery}`)
       setStatus(r)
       return r
     } catch {
