@@ -2,40 +2,34 @@ import { hmac256 } from './cryptoBox.js'
 
 const MID = () => process.env.KASHIER_MERCHANT_ID || ''
 const APIKEY = () => process.env.KASHIER_API_KEY || ''
-const MODE = () => (process.env.KASHIER_MODE === 'live' ? 'live' : 'test')
+const MODE = () => process.env.KASHIER_MODE || 'test'
 
 export function formatAmount(n: number): string {
   return Number(n).toFixed(2)
 }
 
-function cleanAmount(n: number): string {
-  return String(Number(n))
-}
-
 export function buildCheckoutUrl(orderCode: string, amountEgp: number, _customerName?: string) {
-  const amount = cleanAmount(amountEgp)
+  const amountStr = formatAmount(amountEgp)
   const currency = 'EGP'
-  const path = `/?payment=${MID()}.${orderCode}.${amount}.${currency}`
+  const path = `/?payment=${MID()}.${orderCode}.${amountStr}.${currency}`
   const hash = hmac256(APIKEY(), path)
   const base = process.env.APP_BASE_URL || ''
-  const kashierHost = MODE() === 'live'
-    ? 'https://iframe.kashier.io'
-    : 'https://test-iframe.kashier.io'
-  const redirect = encodeURIComponent(`${base}/card/${orderCode}`)
-  const failRedirect = encodeURIComponent(`${base}/card/${orderCode}`)
+  const redirectUrl = `${base}/card/${orderCode}`
 
-  const params = [
-    `mid=${MID()}`,
-    `orderId=${orderCode}`,
-    `amount=${amount}`,
-    `currency=${currency}`,
-    `hash=${hash}`,
-    `merchantRedirect=${redirect}`,
-    `failureRedirect=${failRedirect}`,
-    `display=en`,
-    `mode=${MODE()}`
-  ]
-  return `${kashierHost}/payment?${params.join('&')}`
+  const params = new URLSearchParams({
+    merchantId: MID(),
+    orderId: orderCode,
+    amount: amountStr,
+    currency,
+    hash,
+    mode: MODE(),
+    merchantRedirect: redirectUrl,
+    allowedMethods: 'card,wallet',
+    display: 'en',
+    redirectMethod: 'get'
+  })
+
+  return `https://checkout.kashier.io/?${params.toString()}`
 }
 
 export function validateWebhook(body: any): { ok: boolean; note: string } {
