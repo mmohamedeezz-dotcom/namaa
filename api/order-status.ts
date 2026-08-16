@@ -7,14 +7,23 @@ export default async function handler(req: any, res: any) {
   if (!onlyMethod(req, res, 'GET')) return
   try {
     const code = String(req.query?.code || '').trim()
+    const paymentStatus = String(req.query?.paymentStatus || '').toUpperCase()
     if (!code) return json(res, 400, { error: 'missing code' })
     const db = sb()
     const { data: order } = await db.from('orders').select('*').eq('order_code', code).maybeSingle()
     if (!order) return json(res, 404, { error: 'order_not_found' })
 
+    if (paymentStatus === 'SUCCESS' && order.status === 'pending') {
+      await db.from('orders').update({
+        status: 'paid',
+        paid_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }).eq('id', order.id).eq('status', 'pending')
+      order.status = 'paid'
+    }
+
     let { data: card } = await db.from('cards').select('*').eq('order_id', order.id).maybeSingle()
 
-    // محرك التقدّم: الدفع تم؟ اصدر. الكارت لسه بيتجهز؟ زامن.
     if (order.status === 'paid') {
       card = await ensureIssued(order)
       if (card) card = await syncCard(order, card)
